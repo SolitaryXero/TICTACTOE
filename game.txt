@@ -1,0 +1,379 @@
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <chrono>
+#include <thread>
+
+#define KEY_UP 72
+#define KEY_DOWN 80
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
+#define KEY_SPACE 32
+
+using namespace std;
+
+
+void delay(int);
+void gotoxy(int, int);
+void startingPrompt();
+void game();
+    void gameStart();
+        void drawTitle();
+        void inputPlayerNames();
+        void animation();
+    void gameplay();
+        void drawGrid();
+            void linex(int , int );
+            void liney();
+            void square(int, int);
+        void CursorControl();
+        void result();
+
+//Grid Location on the console
+struct {
+    int x = 107;
+    int y = 18;
+} grid;
+//title location
+struct {
+    int nextNumberx = 0;
+    int x = 69;
+    int y = 15;
+} title;
+//cursorControl
+struct {
+    int keyPressed = 0;
+    int x = 110;
+    int y = 21;
+    int jumpx = 6;
+    int jumpy = 5;
+} cursor;
+
+int const gridsize = 3;
+int const totalSquares = gridsize*gridsize;
+int position[totalSquares];
+
+int maxRangeX = 236;
+int maxRangeY = 66;
+int const totalPlayers = 2;
+string playerNames[totalPlayers];
+string player1Name;
+string player2Name;
+
+
+
+
+void delay(int x){
+    using namespace std::this_thread; // sleep_for, sleep_until
+    using namespace std::chrono; // nanoseconds, system_clock, seconds
+    sleep_for(seconds(x));
+};
+
+
+void gotoxy(int x, int y)
+{
+    COORD c = { x, y };
+    SetConsoleCursorPosition(  GetStdHandle(STD_OUTPUT_HANDLE) , c);
+}
+
+void game(){
+    gameStart();
+    gameplay();
+};
+
+void gameStart(){
+    drawTitle();
+    inputPlayerNames();
+    animation();
+};
+
+void gameplay(){
+    drawGrid();
+    CursorControl();
+};
+
+//Drawing title i.e: TICTACTOE
+void drawTitle(){
+
+    //Top horizontal line of the Letters
+    title.nextNumberx = 0;
+    title.x = 69;
+    title.y = 15;
+
+    for (int i = 1; i <= 9; i++){
+        gotoxy(title.x+title.nextNumberx, title.y);
+        for (int j = 1; j <= 11; j++){
+            cout << '*';
+        };
+
+        title.nextNumberx  += 12;
+        if (i >= 5)
+            cout << ' ';
+    };
+
+    //Bottom horizontal line of the letters
+    title.nextNumberx = 0;
+    title.y = 22;
+    for (int i = 1; i <= 10; i++){
+
+        if (i == 1 || i == 4 || i == 7){
+            title.nextNumberx += 12;
+            continue;
+        } else if (i == 5 || i == 9){
+            title.y -= 3;
+        } else if (i == 10){
+            title.nextNumberx -= 12;
+        };
+        
+        gotoxy(title.x+title.nextNumberx, title.y);
+        for (int j = 1; j <= 11; j++){
+            cout << '*';
+        };
+        title.y = 22;
+
+        title.nextNumberx += 12;
+        if (i >= 5)
+            cout << ' ';
+
+    };
+
+    //middle vertical line of the letters
+    title.nextNumberx = 0;
+    title.x = 74;
+    title.y = 15;
+    for (int i = 1; i <= 12; i++){
+        for (int j = 1; j <= 8; j++){
+
+            gotoxy(title.x+title.nextNumberx, title.y);
+            cout << '*' << endl;
+            title.y++;
+        };
+        title.y -= 8;
+        if (i == 2){
+            title.nextNumberx += 12;
+        } else if (i == 3 ||i == 5 || i == 9 ){
+            title.nextNumberx += 7;
+        } else if (i == 4 || i == 8){
+            title.nextNumberx += 17;
+        } else if (i == 6 || i == 10){
+            title.nextNumberx += 10;
+        } else if (i == 7 || i == 11){
+            title.nextNumberx += 2;
+        };
+        
+    };
+};
+//Inputting PlayerNames
+void inputPlayerNames(){
+    gotoxy(title.x, (title.y+7)+7);
+    cout << "Please input Player 1 name:";
+    cin >> player1Name;
+    gotoxy(title.x+27, (title.y+7)+7);
+    for (int j = 1; j <= 140; j++){
+            cout << " ";
+    };
+    gotoxy(title.x, (title.y+7)+7);
+    cout << "Please input Player 2 name:";
+    cin >> player2Name;
+    gotoxy(title.x+27, (title.y+7)+7);
+
+};
+//Animation to end titlePage
+void animation(){
+    gotoxy(0,0);
+    int x = 0;
+    for (int i = 0; i < 66; i++){
+        gotoxy(0,x);
+        for (int j = 0; j < 236; j++){
+            cout << "*";
+        };
+        x++;
+    };
+    delay(1);
+    system("cls");
+};
+
+//Function for Horizontal line
+void linex(int x, int y) {
+    gotoxy(x+1, y);
+    for (int i = 0; i < 5; i++) {
+        cout << "_";
+    };
+
+};
+//Function for Vertical line
+void liney (int x, int y){
+    gotoxy(x, y);
+    for (int i = 0; i < 5; i++){
+        gotoxy(x, y+1);
+        cout << "|" << endl;
+        y++;
+    };
+};
+//Function making a square using 2 Horizontal and 2 Vertical lines
+void square(int x, int y) {
+
+        linex(x, y);
+        linex(x, y+5);
+
+        liney(x, y);
+        liney(x+6, y);
+};
+
+void drawGrid(){
+
+    grid.y;
+    for(int i = 0; i < gridsize; i++){
+        for(int j = 0; j < gridsize; j++){
+            square(grid.x+j, grid.y);
+            grid.x += 5;
+        };
+        grid.x -= (gridsize * 5);
+        grid.y += 5;
+    };
+
+    for (int j = 0; j < totalSquares+2; j++){
+        for (int i = 1; i <= totalSquares; i++){
+            int x = 33;
+            position[i] = x + i;
+        };
+    };
+};
+
+void CursorControl(){
+
+    int pos = 1;
+    bool isTurn = true;
+    int movesMade = 0;
+    gotoxy(cursor.x, cursor.y);
+
+    while(pos < 1000){
+        result();
+        if (movesMade == totalSquares){
+            gotoxy(250, 50);
+            cout << "IT'S A DRAW!";
+            exit(1);
+        };
+
+        //moving beyond right edge
+        if (cursor.x > (110 +1 + (6 * (gridsize-1)))){
+                cursor.x -= 6 * gridsize;
+                pos -= 3;
+                gotoxy(cursor.x, cursor.y);
+        //moving Beyond bottom edge
+        } else if (cursor.y > (21 +1 + (5 * (gridsize-1)))){
+                cursor.y -= 5 * gridsize;
+                pos -= 9;
+                gotoxy(cursor.x, cursor.y);
+        //moving beyond Left edge
+        } else if (cursor.x < 109){
+                cursor.x += 6 * gridsize;
+                pos += 3;
+                gotoxy(cursor.x, cursor.y);
+        //moving beyond top edge
+        } else if (cursor.y < 20){
+                cursor.y += 5 * gridsize;
+                pos += 9;
+                gotoxy(cursor.x, cursor.y);
+        };
+
+        
+        switch (cursor.keyPressed = getch()){
+            case KEY_UP:
+                gotoxy(cursor.x, cursor.y-cursor.jumpy);
+                cursor.y -= cursor.jumpy;
+                pos -= 3;
+                break;
+            case KEY_DOWN:
+                gotoxy(cursor.x, cursor.y+cursor.jumpy);
+                cursor.y += cursor.jumpy;
+                pos += 3;
+                break;
+            case KEY_LEFT:
+                gotoxy(cursor.x-cursor.jumpx, cursor.y);
+                cursor.x -= cursor.jumpx;
+                pos--;
+                break;
+            case KEY_RIGHT:
+                gotoxy(cursor.x+cursor.jumpx, cursor.y);
+                cursor.x += cursor.jumpx;
+                pos++;
+                break;
+            case KEY_SPACE:
+                cout << " ";
+                gotoxy (cursor.x, cursor.y);
+
+                if (isTurn == true){
+                    cout << "X";
+                    isTurn = false;
+                    position[pos] = 1;
+                    movesMade++;
+                    break;
+                };
+                
+                if (isTurn == false){
+                    cout << "O";
+                    isTurn = true;
+                    position[pos] = 2;
+                    movesMade++;
+                    break;
+                };
+        };
+        
+    };
+};
+
+void result(){
+    if (
+        (position[1] == 1 && position[1] == position[4] && position[1] == position[7]) ||
+        (position[2] == 1 && position[2] == position[5] && position[2] == position[8]) ||
+        (position[3] == 1 && position[3] == position[6] && position[3] == position[9]) ||
+        (position[1] == 1 && position[1] == position[5] && position[1] == position[9]) ||
+        (position[3] == 1 && position[3] == position[5] && position[3] == position[7]) ||
+        (position[1] == 1 && position[1] == position[2] && position[1] == position[3]) ||
+        (position[4] == 1 && position[4] == position[5] && position[4] == position[6]) ||
+        (position[7] == 1 && position[7] == position[8] && position[7] == position[9]) ) {
+
+        gotoxy(110, 49);
+        cout << "CONGRATULATIONS"; 
+        gotoxy(107, 50);
+        cout << player1Name << " is the Winner.";
+        exit(1);
+    };
+
+    if ((position[1] == 2 && position[1] == position[2] && position[1] == position[3]) ||
+        (position[1] == 2 && position[1] == position[4] && position[1] == position[7]) ||
+        (position[1] == 2 && position[1] == position[5] && position[1] == position[9]) ||
+        (position[2] == 2 && position[2] == position[5] && position[2] == position[8]) ||
+        (position[3] == 2 && position[3] == position[5] && position[3] == position[7]) ||
+        (position[3] == 2 && position[3] == position[6] && position[3] == position[9]) ||
+        (position[4] == 2 && position[4] == position[5] && position[4] == position[6]) ||
+        (position[7] == 2 && position[7] == position[8] && position[7] == position[9]) ) {
+
+        gotoxy(110, 49);
+        cout << "CONGRATULATIONS";
+        gotoxy(107, 50);
+        cout << player2Name << " is the Winner.";
+        exit(1);
+    };
+};
+
+void startingPrompt(){
+
+    int enterKeyPressed = 0;
+    cout << "Please hold ALT and hit ENTER" << endl;
+    cout << "Then press Any Key to start game." << endl;
+    while (true){
+            if (kbhit()){
+            cout << "HElLOW";
+            break;
+        };    
+    }; 
+    for (int i = 0;i < 3; i++){
+        gotoxy(0,i);
+        for (int j = 0; j < 40; j++){
+            cout << " "; 
+        };    
+    };
+
+};
